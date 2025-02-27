@@ -232,7 +232,7 @@
       <h1 class="title">Arangetram</h1>
 
       <img
-        src="./images/dance.jpg"
+        src="images/dance.jpg"
         alt="Arangetram Dance Performance"
         class="hero-image"
       />
@@ -311,10 +311,15 @@
       const nextButton = document.getElementById("nextButton");
       const pageIndicator = document.getElementById("pageIndicator");
 
+      function getImagePath() {
+        const isGitHubPages = window.location.hostname.includes("github.io");
+        return isGitHubPages ? "/dance-program/images/" : "./images/";
+      }
+
       function preloadImages() {
         pages.forEach((page) => {
           const img = new Image();
-          img.src = `./images/${page.image}`;
+          img.src = `${getImagePath()}${page.image}`;
           imageCache.set(page.image, img);
         });
       }
