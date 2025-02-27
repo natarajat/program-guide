@@ -239,27 +239,28 @@
 
       .home-link {
         position: absolute;
-        top: 20px;
-        left: 20px;
-        color: #0066cc;
+        bottom: 20px;
+        right: 80px;
+        color: white;
         text-decoration: none;
-        padding: 8px 16px;
-        background: rgba(255, 255, 255, 0.9);
+        padding: 8px 12px;
+        background: rgba(0, 0, 0, 0.5);
         border-radius: 20px;
-        font-size: 14px;
+        font-size: 20px;
         transition: all 0.3s;
         z-index: 10;
+        line-height: 1;
       }
 
       .home-link:hover {
-        background: white;
-        color: #004d99;
+        background: rgba(0, 0, 0, 0.8);
       }
 
       @media (max-width: 768px) {
         .home-link {
-          font-size: 12px;
-          padding: 6px 12px;
+          font-size: 18px;
+          padding: 6px 10px;
+          bottom: 20px;
         }
       }
     </style>
@@ -322,15 +323,19 @@
     <!-- Program Pages -->
     <div id="programPages" class="hidden">
       <div id="pageContainer">
-        <a href="#" onclick="returnToLanding(event)" class="home-link"
-          >← Back to Event Details</a
-        >
         <div id="imageContainer">
           <img id="currentImage" src="./images/dance1.jpg" alt="Dance Page 1" />
           <button id="prevButton" class="navButton" disabled>←</button>
           <button id="nextButton" class="navButton">→</button>
           <div id="loadingIndicator">Loading...</div>
           <div id="pageIndicator">Page 1 of 7</div>
+          <a
+            href="#"
+            onclick="returnToLanding(event)"
+            class="home-link"
+            title="Back to Event Details"
+            >↩</a
+          >
         </div>
       </div>
     </div>
