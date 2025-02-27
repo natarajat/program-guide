@@ -236,6 +236,32 @@
       .hidden {
         display: none;
       }
+
+      .home-link {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: #0066cc;
+        text-decoration: none;
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        font-size: 14px;
+        transition: all 0.3s;
+        z-index: 10;
+      }
+
+      .home-link:hover {
+        background: white;
+        color: #004d99;
+      }
+
+      @media (max-width: 768px) {
+        .home-link {
+          font-size: 12px;
+          padding: 6px 12px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -248,6 +274,8 @@
         alt="Arangetram Dance Performance"
         class="hero-image"
       />
+
+      <button class="enter-button" onclick="showProgram()">View Program</button>
 
       <div class="venue-details">
         <h2>Venue</h2>
@@ -289,13 +317,14 @@
       <div class="instructions">
         <p>Light snacks will be provided</p>
       </div>
-
-      <button class="enter-button" onclick="showProgram()">View Program</button>
     </div>
 
     <!-- Program Pages -->
     <div id="programPages" class="hidden">
       <div id="pageContainer">
+        <a href="#" onclick="returnToLanding(event)" class="home-link"
+          >← Back to Event Details</a
+        >
         <div id="imageContainer">
           <img id="currentImage" src="./images/dance1.jpg" alt="Dance Page 1" />
           <button id="prevButton" class="navButton" disabled>←</button>
@@ -482,6 +511,15 @@
 
       // Handle browser back/forward buttons
       window.addEventListener("popstate", initializePage);
+
+      function returnToLanding(event) {
+        event.preventDefault();
+        document.getElementById("programPages").classList.add("hidden");
+        document.getElementById("landingPage").classList.remove("hidden");
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.delete("page");
+        window.history.pushState({}, "", newUrl);
+      }
     </script>
   </body>
 </html>
