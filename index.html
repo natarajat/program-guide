@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dance Program</title>
-    <base href="." />
     <style>
       body {
         margin: 0;
@@ -234,7 +233,6 @@
 
       <img
         id="landingImage"
-        src="./images/dance.jpg"
         alt="Arangetram Dance Performance"
         class="hero-image"
       />
@@ -464,6 +462,11 @@
 
       // Initialize the page on load
       initializePage();
+
+      // Set the landing image src using the same path logic as program images
+      document.getElementById(
+        "landingImage"
+      ).src = `${getImagePath()}dance.jpg`;
 
       // Handle browser back/forward buttons
       window.addEventListener("popstate", initializePage);
