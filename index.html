@@ -232,7 +232,7 @@
       <h1 class="title">Arangetram</h1>
 
       <img
-        src="images/dance.jpg"
+        id="landingImage"
         alt="Arangetram Dance Performance"
         class="hero-image"
       />
@@ -462,6 +462,11 @@
 
       // Initialize the page on load
       initializePage();
+
+      // Set the landing page image src
+      document.getElementById(
+        "landingImage"
+      ).src = `${getImagePath()}dance.jpg`;
 
       // Handle browser back/forward buttons
       window.addEventListener("popstate", initializePage);
