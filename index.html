@@ -232,7 +232,7 @@
       <h1 class="title">Arangetram</h1>
 
       <img
-        src="/dance-program/images/dance.jpg"
+        src="./images/dance.jpg"
         alt="Arangetram Dance Performance"
         class="hero-image"
       />
@@ -285,7 +285,7 @@
     <div id="programPages" class="hidden">
       <div id="pageContainer">
         <div id="imageContainer">
-          <img id="currentImage" src="/dance-program/images/dance1.jpg" alt="Dance Page 1" />
+          <img id="currentImage" src="./images/dance1.jpg" alt="Dance Page 1" />
           <button id="prevButton" class="navButton" disabled>←</button>
           <button id="nextButton" class="navButton">→</button>
           <div id="loadingIndicator">Loading...</div>
@@ -314,7 +314,7 @@
       function preloadImages() {
         pages.forEach((page) => {
           const img = new Image();
-          img.src = `/dance-program/images/${page.image}`;
+          img.src = `./images/${page.image}`;
           imageCache.set(page.image, img);
         });
       }
