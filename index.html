@@ -11,7 +11,7 @@
       property="og:description"
       content="Niharika's Bharatanatyam Arangetram at Cary Arts Center"
     />
-    <meta property="og:image" content="./images/dance.jpg" />
+    <meta property="og:image" content="./images/Page1.png" />
     <meta property="og:url" content="https://niha-arangetram.art/" />
     <meta property="og:type" content="website" />
 
@@ -22,7 +22,7 @@
       name="twitter:description"
       content="Bharatanatyam Arangetram at Cary Arts Center"
     />
-    <meta name="twitter:image" content="./images/dance.jpg" />
+    <meta name="twitter:image" content="./images/Page1.png" />
 
     <style>
       body {
@@ -344,7 +344,7 @@
     <div id="programPages" class="hidden">
       <div id="pageContainer">
         <div id="imageContainer">
-          <img id="currentImage" src="./images/Page1.png" alt="Dance Page 1" />
+          <img id="currentImage" src="./images/dance1.jpg" alt="Dance Page 1" />
           <button id="prevButton" class="navButton" disabled>←</button>
           <button id="nextButton" class="navButton">→</button>
           <div id="loadingIndicator">Loading...</div>
@@ -362,7 +362,7 @@
 
     <script>
       const pages = [
-        { image: "Page1.png", pageNum: 1 },
+        { image: "page1.png", pageNum: 1 },
         { image: "dance2.jpg", pageNum: 2 },
         { image: "dance3.jpg", pageNum: 3 },
         { image: "dance4.jpg", pageNum: 4 },
@@ -532,7 +532,7 @@
       // Set the landing image src using the same path logic as program images
       document.getElementById(
         "landingImage"
-      ).src = `${getImagePath()}dance.jpg`;
+      ).src = `${getImagePath()}Page1.png`;
 
       // Handle browser back/forward buttons
       window.addEventListener("popstate", initializePage);
