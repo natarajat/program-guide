@@ -203,8 +203,8 @@
             return;
           }
 
-          // Try both .jpg and .png formats
-          const formats = ["jpg", "png"];
+          // Try both .jpg/.JPG and .png/.PNG formats (case insensitive)
+          const formats = ["jpg", "JPG", "png", "PNG"];
           let formatIndex = 0;
           let foundAnyFormat = false;
 
