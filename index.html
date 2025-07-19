@@ -264,7 +264,10 @@
       const homeLink = document.querySelector(".home-link");
 
       function getImagePath() {
-        const isGitHubPages = window.location.hostname.includes("github.io");
+        // Check if we're on GitHub Pages by looking at the URL structure
+        const isGitHubPages =
+          window.location.hostname.includes("github.io") ||
+          window.location.pathname.includes("/program-guide/");
         return isGitHubPages ? "/program-guide/images/" : "./images/";
       }
 
