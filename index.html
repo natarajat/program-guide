@@ -220,7 +220,7 @@
             imgForCache.src = `${getImagePath()}page${pageNum}.${format}`;
             imageCache.set(`page${pageNum}.${format}`, imgForCache);
 
-            // If this is page 1, initialize immediately and stop detection temporarily
+            // If this is page 1, initialize immediately and continue detection
             if (pageNum === 1 && !isInitialized) {
               initializeApp();
               // Continue detecting other pages in background after a short delay
@@ -229,7 +229,10 @@
                 checkNextPage();
               }, 100);
             } else {
-              // For other pages, just continue detection
+              // For other pages, update navigation and continue detection
+              if (isInitialized) {
+                updateNavigationButtons();
+              }
               pageNum++;
               checkNextPage();
             }
@@ -240,6 +243,7 @@
             if (pages.length > 0 && !isInitialized) {
               initializeApp();
             }
+            // Always stop when we can't find a page
             return;
           };
 
