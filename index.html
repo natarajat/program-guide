@@ -11,9 +11,9 @@
       property="og:description"
       content="Niharika's Bharatanatyam Arangetram at Cary Arts Center"
     />
-    <meta property="og:image" content="./images/page1.jpg" />
+    <meta property="og:image" content="./images/page1.JPG" />
     <meta property="og:url" content="https://niha-arangetram.art/" />
-    <meta property="og:type" content="website" />  
+    <meta property="og:type" content="website" />
 
     <!-- Add Twitter Card tags for Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -22,7 +22,7 @@
       name="twitter:description"
       content="Bharatanatyam Arangetram at Cary Arts Center"
     />
-    <meta name="twitter:image" content="./images/page1.jpg" />
+    <meta name="twitter:image" content="./images/page1.JPG" />
 
     <style>
       body {
@@ -167,7 +167,7 @@
     <!-- Program Pages -->
     <div id="pageContainer">
       <div id="imageContainer">
-        <img id="currentImage" src="./images/page1.jpg" alt="Page 1" />
+        <img id="currentImage" src="./images/page1.JPG" alt="Page 1" />
         <button id="prevButton" class="navButton">←</button>
         <button id="nextButton" class="navButton">→</button>
         <div id="loadingIndicator">Loading...</div>
@@ -187,6 +187,7 @@
       // Dynamic page detection - will automatically include all page* files
       const pages = [];
       let maxPageNumber = 0;
+      let isInitialized = false;
 
       // Function to detect available pages
       function detectPages() {
@@ -203,53 +204,46 @@
             return;
           }
 
-          // Try both .jpg/.JPG and .png/.PNG formats (case insensitive)
-          const formats = ["jpg", "JPG", "png", "PNG"];
-          let formatIndex = 0;
-          let foundAnyFormat = false;
+          // Only try .JPG format (uppercase)
+          const format = "JPG";
+          const img = new Image();
 
-          function tryFormat() {
-            if (formatIndex >= formats.length) {
-              // No more formats to try
-              if (!foundAnyFormat) {
-                // If we didn't find any format for this page number, stop detection
-                if (pages.length > 0) {
-                  initializeApp();
-                }
-                return;
-              }
-              // Found a format, move to next page number
+          img.onload = function () {
+            pages.push({
+              image: `page${pageNum}.${format}`,
+              pageNum: pageNum,
+            });
+            maxPageNumber = Math.max(maxPageNumber, pageNum);
+
+            // Preload this image into cache
+            const imgForCache = new Image();
+            imgForCache.src = `${getImagePath()}page${pageNum}.${format}`;
+            imageCache.set(`page${pageNum}.${format}`, imgForCache);
+
+            // If this is page 1, initialize immediately and stop detection temporarily
+            if (pageNum === 1 && !isInitialized) {
+              initializeApp();
+              // Continue detecting other pages in background after a short delay
+              setTimeout(() => {
+                pageNum++;
+                checkNextPage();
+              }, 100);
+            } else {
+              // For other pages, just continue detection
               pageNum++;
               checkNextPage();
-              return;
             }
+          };
 
-            const format = formats[formatIndex];
-            const img = new Image();
+          img.onerror = function () {
+            // If we can't find this page, stop detection
+            if (pages.length > 0 && !isInitialized) {
+              initializeApp();
+            }
+            return;
+          };
 
-            img.onload = function () {
-              pages.push({
-                image: `page${pageNum}.${format}`,
-                pageNum: pageNum,
-              });
-              maxPageNumber = Math.max(maxPageNumber, pageNum);
-              foundAnyFormat = true;
-              pageNum++;
-              // Check next page
-              checkNextPage();
-            };
-
-            img.onerror = function () {
-              // Try next format
-              formatIndex++;
-              tryFormat();
-            };
-
-            img.src = `${getImagePath()}page${pageNum}.${format}`;
-          }
-
-          // Start trying formats for current page number
-          tryFormat();
+          img.src = `${getImagePath()}page${pageNum}.${format}`;
         }
 
         // Start checking from page 1
@@ -264,11 +258,24 @@
       const homeLink = document.querySelector(".home-link");
 
       function getImagePath() {
-        // Check if we're on GitHub Pages by looking at the URL structure
+        // Check for GitHub Pages (including custom domains)
         const isGitHubPages =
           window.location.hostname.includes("github.io") ||
+          window.location.hostname === "niha-arangetram.art" ||
           window.location.pathname.includes("/program-guide/");
-        return isGitHubPages ? "/program-guide/images/" : "./images/";
+
+        // For custom domain, we need to use absolute paths
+        if (window.location.hostname === "niha-arangetram.art") {
+          return "/images/";
+        }
+
+        // For regular GitHub Pages
+        if (window.location.hostname.includes("github.io")) {
+          return "/program-guide/images/";
+        }
+
+        // For local development
+        return "./images/";
       }
 
       function preloadImages() {
@@ -408,8 +415,9 @@
       }
 
       function initializeApp() {
-        // Preload all detected images
-        preloadImages();
+        isInitialized = true;
+
+        // Images are now preloaded as they're detected, so no need to call preloadImages()
 
         // Initialize the page
         initializePage();
