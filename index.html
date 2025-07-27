@@ -167,7 +167,7 @@
     <!-- Program Pages -->
     <div id="pageContainer">
       <div id="imageContainer">
-        <img id="currentImage" src="./images/page1.JPG" alt="Page 1" />
+        <img id="currentImage" src="./images/pg-1.jpg" alt="Page 1" />
         <button id="prevButton" class="navButton">←</button>
         <button id="nextButton" class="navButton">→</button>
         <div id="loadingIndicator">Loading...</div>
@@ -191,7 +191,7 @@
 
       // Function to detect available pages
       function detectPages() {
-        // Start with page1 and check for subsequent pages
+        // Start with pg-1 and check for subsequent pages
         let pageNum = 1;
         const maxPages = 20; // Reduced limit to prevent excessive requests
 
@@ -204,21 +204,21 @@
             return;
           }
 
-          // Only try .JPG format (uppercase)
-          const format = "JPG";
+          // Only try .jpg format (lowercase)
+          const format = "jpg";
           const img = new Image();
 
           img.onload = function () {
             pages.push({
-              image: `page${pageNum}.${format}`,
+              image: `pg-${pageNum}.${format}`,
               pageNum: pageNum,
             });
             maxPageNumber = Math.max(maxPageNumber, pageNum);
 
             // Preload this image into cache
             const imgForCache = new Image();
-            imgForCache.src = `${getImagePath()}page${pageNum}.${format}`;
-            imageCache.set(`page${pageNum}.${format}`, imgForCache);
+            imgForCache.src = `${getImagePath()}pg-${pageNum}.${format}`;
+            imageCache.set(`pg-${pageNum}.${format}`, imgForCache);
 
             // If this is page 1, initialize immediately and continue detection
             if (pageNum === 1 && !isInitialized) {
@@ -247,7 +247,7 @@
             return;
           };
 
-          img.src = `${getImagePath()}page${pageNum}.${format}`;
+          img.src = `${getImagePath()}pg-${pageNum}.${format}`;
         }
 
         // Start checking from page 1
@@ -291,28 +291,29 @@
       }
 
       function updateNavigationButtons() {
-        // First page: hide left arrow, show right arrow
+        // Always show navigation buttons by default, then conditionally hide them
+        prevButton.style.display = "block";
+        nextButton.style.display = "block";
+        prevButton.disabled = false;
+        nextButton.disabled = false;
+
+        // First page: hide left arrow, show right arrow (if more pages exist)
         if (currentIndex === 0) {
           prevButton.style.display = "none";
           prevButton.disabled = true;
-          nextButton.style.display = "block";
-          nextButton.disabled = false;
+          // Only hide next button if we're sure there are no more pages
+          if (pages.length <= 1) {
+            nextButton.style.display = "none";
+            nextButton.disabled = true;
+          }
           homeLink.style.display = "none";
         }
         // Second page: show both arrows, no home link
         else if (currentIndex === 1) {
-          prevButton.style.display = "block";
-          prevButton.disabled = false;
-          nextButton.style.display = "block";
-          nextButton.disabled = false;
           homeLink.style.display = "none";
         }
         // Third page onwards: show both arrows and home link
         else {
-          prevButton.style.display = "block";
-          prevButton.disabled = false;
-          nextButton.style.display = "block";
-          nextButton.disabled = false;
           homeLink.style.display = "block";
         }
 
