@@ -184,74 +184,26 @@
     </div>
 
     <script>
-      // Dynamic page detection - will automatically include all page* files
+      // Static page configuration - exactly 17 pages
       const pages = [];
-      let maxPageNumber = 0;
+      const TOTAL_PAGES = 17;
       let isInitialized = false;
 
-      // Function to detect available pages
-      function detectPages() {
-        // Start with pg-1 and check for subsequent pages
-        let pageNum = 1;
-        const maxPages = 20; // Reduced limit to prevent excessive requests
-
-        function checkNextPage() {
-          if (pageNum > maxPages) {
-            // Stop if we've reached the limit
-            if (pages.length > 0) {
-              initializeApp();
-            }
-            return;
-          }
-
-          // Only try .jpg format (lowercase)
-          const format = "jpg";
-          const img = new Image();
-
-          img.onload = function () {
-            pages.push({
-              image: `pg-${pageNum}.${format}`,
-              pageNum: pageNum,
-            });
-            maxPageNumber = Math.max(maxPageNumber, pageNum);
-
-            // Preload this image into cache
-            const imgForCache = new Image();
-            imgForCache.src = `${getImagePath()}pg-${pageNum}.${format}`;
-            imageCache.set(`pg-${pageNum}.${format}`, imgForCache);
-
-            // If this is page 1, initialize immediately and continue detection
-            if (pageNum === 1 && !isInitialized) {
-              initializeApp();
-              // Continue detecting other pages in background after a short delay
-              setTimeout(() => {
-                pageNum++;
-                checkNextPage();
-              }, 100);
-            } else {
-              // For other pages, update navigation and continue detection
-              if (isInitialized) {
-                updateNavigationButtons();
-              }
-              pageNum++;
-              checkNextPage();
-            }
-          };
-
-          img.onerror = function () {
-            // If we can't find this page, stop detection
-            if (pages.length > 0 && !isInitialized) {
-              initializeApp();
-            }
-            // Always stop when we can't find a page
-            return;
-          };
-
-          img.src = `${getImagePath()}pg-${pageNum}.${format}`;
+      // Function to initialize pages
+      function initializePages() {
+        // Create page objects for all 17 pages
+        for (let pageNum = 1; pageNum <= TOTAL_PAGES; pageNum++) {
+          pages.push({
+            image: `pg-${pageNum}.jpg`,
+            pageNum: pageNum,
+          });
         }
 
-        // Start checking from page 1
-        checkNextPage();
+        // Preload all images
+        preloadImages();
+
+        // Initialize the app
+        initializeApp();
       }
 
       let currentIndex = 0;
@@ -428,8 +380,8 @@
         initializePage();
       }
 
-      // Start by detecting available pages
-      detectPages();
+      // Start by initializing pages
+      initializePages();
 
       // Handle browser back/forward buttons
       window.addEventListener("popstate", initializePage);
