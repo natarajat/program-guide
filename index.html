@@ -537,20 +537,20 @@
         if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
           const pageContainer = document.getElementById("pageContainer");
           if (pageContainer) {
-            // More aggressive height reduction for iOS
-            pageContainer.style.height = "90vh";
+            // Much more aggressive height reduction for iOS
+            pageContainer.style.height = "85vh";
             pageContainer.style.height =
-              "calc(90vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))";
+              "calc(85vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))";
 
             // Also adjust the body to ensure proper centering
             document.body.style.minHeight = "100vh";
             document.body.style.minHeight = "100dvh";
 
-            // Add bottom padding to avoid address bar
-            pageContainer.style.paddingBottom = "50px";
+            // Add much more bottom padding to avoid address bar
+            pageContainer.style.paddingBottom = "100px";
 
             console.log(
-              "iOS detected - height adjusted to 90vh with 50px bottom padding"
+              "iOS detected - height adjusted to 85vh with 100px bottom padding"
             );
           }
         }
