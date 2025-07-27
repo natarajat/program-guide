@@ -63,9 +63,9 @@
         padding-bottom: env(safe-area-inset-bottom);
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
-        /* Disable scrolling entirely */
-        overflow: hidden;
+        /* Prevent scrolling but allow zooming */
         overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
       }
 
       #pageContainer {
@@ -471,20 +471,30 @@
         if (e.key === "ArrowRight" && !nextButton.disabled) navigateImage(1);
       });
 
-      // Touch support
+      // Touch support with better zoom handling
       let touchStartX = 0;
+      let touchStartY = 0;
+      let touchCount = 0;
+
       document.addEventListener("touchstart", (e) => {
         touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchCount = e.touches.length;
       });
 
       document.addEventListener("touchend", (e) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        const diff = touchStartX - touchEndX;
+        // Only handle single-finger swipes (not pinch-to-zoom)
+        if (touchCount === 1 && e.changedTouches.length === 1) {
+          const touchEndX = e.changedTouches[0].clientX;
+          const touchEndY = e.changedTouches[0].clientY;
+          const diffX = touchStartX - touchEndX;
+          const diffY = Math.abs(touchStartY - touchEndY);
 
-        if (Math.abs(diff) > 50) {
-          // Minimum swipe distance
-          if (diff > 0 && !nextButton.disabled) navigateImage(1); // Swipe left
-          if (diff < 0 && !prevButton.disabled) navigateImage(-1); // Swipe right
+          // Only navigate if it's a horizontal swipe (not vertical scroll/zoom)
+          if (Math.abs(diffX) > 50 && diffY < 100) {
+            if (diffX > 0 && !nextButton.disabled) navigateImage(1); // Swipe left
+            if (diffX < 0 && !prevButton.disabled) navigateImage(-1); // Swipe right
+          }
         }
       });
 
