@@ -84,6 +84,16 @@
         align-items: center;
       }
 
+      /* iOS-specific height reduction to avoid address bar overlap */
+      @supports (-webkit-touch-callout: none) {
+        #pageContainer {
+          height: 95vh;
+          height: calc(
+            95vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+          );
+        }
+      }
+
       #imageContainer {
         position: relative;
         width: 100%;
