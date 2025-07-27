@@ -2,7 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Niharika's Arangetram" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>Niharika's Arangetram</title>
 
     <!-- Add these Open Graph meta tags -->
@@ -27,18 +31,30 @@
     <style>
       body {
         margin: 0;
+        padding: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
+        min-height: 100dvh; /* Dynamic viewport height for mobile */
         font-family: Arial, sans-serif;
+        /* Handle safe areas for devices with notches */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        /* Prevent overscroll bounce on iOS */
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
       }
 
       #pageContainer {
         position: relative;
         max-width: 90vw;
+        max-width: calc(90vw - env(safe-area-inset-left) - env(safe-area-inset-right));
         height: 80vh;
+        height: calc(80vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -161,6 +177,34 @@
           bottom: 20px;
         }
       }
+
+      /* Fullscreen and mobile-specific styles */
+      @media screen and (display-mode: standalone) {
+        /* Styles for when app is launched from home screen */
+        body {
+          padding-top: 0;
+          padding-bottom: 0;
+        }
+      }
+
+      /* Prevent text selection and context menus */
+      * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Allow text selection for specific elements if needed */
+      input, textarea {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
     </style>
   </head>
   <body>
@@ -191,27 +235,44 @@
 
       // Function to initialize pages
       function initializePages() {
-        // Create page objects for all 17 pages
-        for (let pageNum = 1; pageNum <= TOTAL_PAGES; pageNum++) {
-          pages.push({
-            image: `pg-${pageNum}.jpg`,
-            pageNum: pageNum,
-          });
+        try {
+          // Create page objects for all 17 pages
+          for (let pageNum = 1; pageNum <= TOTAL_PAGES; pageNum++) {
+            pages.push({
+              image: `pg-${pageNum}.jpg`,
+              pageNum: pageNum,
+            });
+          }
+
+          // Preload all images
+          preloadImages();
+
+          // Initialize the app
+          initializeApp();
+        } catch (error) {
+          console.error("Error in initializePages:", error);
+          throw error; // Re-throw to be caught by the outer try-catch
         }
-
-        // Preload all images
-        preloadImages();
-
-        // Initialize the app
-        initializeApp();
       }
 
       let currentIndex = 0;
       const imageCache = new Map();
-      const prevButton = document.getElementById("prevButton");
-      const nextButton = document.getElementById("nextButton");
-      const pageIndicator = document.getElementById("pageIndicator");
-      const homeLink = document.querySelector(".home-link");
+
+      // Get DOM elements with error checking
+      function getDOMElements() {
+        const prevButton = document.getElementById("prevButton");
+        const nextButton = document.getElementById("nextButton");
+        const pageIndicator = document.getElementById("pageIndicator");
+        const homeLink = document.querySelector(".home-link");
+
+        if (!prevButton || !nextButton || !pageIndicator) {
+          throw new Error("Required DOM elements not found");
+        }
+
+        return { prevButton, nextButton, pageIndicator, homeLink };
+      }
+
+      let prevButton, nextButton, pageIndicator, homeLink;
 
       function getImagePath() {
         // Check for GitHub Pages (including custom domains)
@@ -237,8 +298,20 @@
       function preloadImages() {
         pages.forEach((page) => {
           const img = new Image();
+          img.onload = function () {
+            // Image loaded successfully
+            imageCache.set(page.image, img);
+          };
+          img.onerror = function () {
+            // Image failed to load - create a placeholder or handle error
+            console.warn(`Failed to load image: ${page.image}`);
+            // Create a fallback image or placeholder
+            const fallbackImg = new Image();
+            fallbackImg.src =
+              "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=";
+            imageCache.set(page.image, fallbackImg);
+          };
           img.src = `${getImagePath()}${page.image}`;
-          imageCache.set(page.image, img);
         });
       }
 
@@ -288,6 +361,17 @@
         const newImage = imageCache.get(pages[currentIndex].image);
         imgElement.alt = `Page ${pages[currentIndex].pageNum}`;
 
+        // Handle case where image might not be in cache yet
+        if (!newImage) {
+          console.warn(
+            `Image not found in cache: ${pages[currentIndex].image}`
+          );
+          imgElement.classList.remove("loading");
+          loadingIndicator.style.display = "none";
+          updateNavigationButtons();
+          return;
+        }
+
         if (newImage.complete) {
           imgElement.src = newImage.src;
           imgElement.classList.remove("loading");
@@ -297,6 +381,11 @@
             imgElement.src = newImage.src;
             imgElement.classList.remove("loading");
             loadingIndicator.style.display = "none";
+          };
+          newImage.onerror = () => {
+            imgElement.classList.remove("loading");
+            loadingIndicator.style.display = "none";
+            console.error(`Failed to load image: ${pages[currentIndex].image}`);
           };
         }
 
@@ -322,9 +411,13 @@
         updateImage();
       }
 
-      // Event Listeners
-      prevButton.addEventListener("click", () => navigateImage(-1));
-      nextButton.addEventListener("click", () => navigateImage(1));
+      // Event Listeners - will be set up after DOM elements are available
+      function setupEventListeners() {
+        if (prevButton && nextButton) {
+          prevButton.addEventListener("click", () => navigateImage(-1));
+          nextButton.addEventListener("click", () => navigateImage(1));
+        }
+      }
 
       // Keyboard navigation
       document.addEventListener("keydown", (e) => {
@@ -372,16 +465,44 @@
       }
 
       function initializeApp() {
-        isInitialized = true;
+        try {
+          isInitialized = true;
 
-        // Images are now preloaded as they're detected, so no need to call preloadImages()
+          // Get DOM elements
+          const elements = getDOMElements();
+          prevButton = elements.prevButton;
+          nextButton = elements.nextButton;
+          pageIndicator = elements.pageIndicator;
+          homeLink = elements.homeLink;
 
-        // Initialize the page
-        initializePage();
+          // Initialize the page
+          initializePage();
+
+          // Setup event listeners
+          setupEventListeners();
+        } catch (error) {
+          console.error("Error in initializeApp:", error);
+          throw error;
+        }
       }
 
-      // Start by initializing pages
-      initializePages();
+      // Start by initializing pages with error handling
+      try {
+        initializePages();
+      } catch (error) {
+        console.error("Error initializing application:", error);
+        // Show a user-friendly error message
+        const pageContainer = document.getElementById("pageContainer");
+        if (pageContainer) {
+          pageContainer.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: #666;">
+              <h3>Something went wrong</h3>
+              <p>Please refresh the page or try again later.</p>
+              <p>Error: ${error.message}</p>
+            </div>
+          `;
+        }
+      }
 
       // Handle browser back/forward buttons
       window.addEventListener("popstate", initializePage);
