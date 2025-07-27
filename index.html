@@ -94,6 +94,18 @@
         }
       }
 
+      /* Alternative iOS detection using user agent targeting */
+      @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        @supports (-webkit-appearance: none) {
+          #pageContainer {
+            height: 95vh;
+            height: calc(
+              95vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+            );
+          }
+        }
+      }
+
       #imageContainer {
         position: relative;
         width: 100%;
@@ -520,9 +532,23 @@
         }
       }
 
+      // iOS-specific height adjustment
+      function adjustForIOS() {
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+          const pageContainer = document.getElementById("pageContainer");
+          if (pageContainer) {
+            pageContainer.style.height = "95vh";
+            pageContainer.style.height =
+              "calc(95vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))";
+          }
+        }
+      }
+
       // Start by initializing pages with error handling
       try {
         initializePages();
+        // Apply iOS-specific adjustments
+        adjustForIOS();
       } catch (error) {
         console.error("Error initializing application:", error);
         // Show a user-friendly error message
