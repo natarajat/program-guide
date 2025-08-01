@@ -297,7 +297,7 @@
           }
 
           // Preload all images
-          preloadImages();
+          //preloadImages();
 
           // Initialize the app
           initializeApp();
@@ -308,7 +308,7 @@
       }
 
       let currentIndex = 0;
-      const imageCache = new Map();
+      const loadedImages = new Set(); // Track which images have been loaded
 
       // Get DOM elements with error checking
       function getDOMElements() {
@@ -347,57 +347,63 @@
         return "./images/";
       }
 
-      function preloadImages() {
-        pages.forEach((page) => {
-          const img = new Image();
-          img.onload = function () {
-            // Image loaded successfully
-            imageCache.set(page.image, img);
-          };
-          img.onerror = function () {
-            // Image failed to load - create a placeholder or handle error
-            console.warn(`Failed to load image: ${page.image}`);
-            // Create a fallback image or placeholder
-            const fallbackImg = new Image();
-            fallbackImg.src =
-              "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=";
-            imageCache.set(page.image, fallbackImg);
-          };
-          img.src = `${getImagePath()}${page.image}`;
-        });
+      // Load a single image as needed
+      function loadImage(pageIndex) {
+        if (pageIndex >= 0 && pageIndex < pages.length) {
+          const page = pages[pageIndex];
+          const imagePath = `${getImagePath()}${page.image}`;
+          
+          const imgElement = document.getElementById("currentImage");
+          
+          // Only load if not already loaded
+          if (!loadedImages.has(page.image)) {
+            console.log(`Loading image: ${page.image} for page ${pageIndex}`);
+            loadedImages.add(page.image);
+            
+            imgElement.src = imagePath;
+            
+            imgElement.onload = () => {
+              console.log(`Successfully loaded: ${page.image}`);
+              imgElement.classList.remove("loading");
+              document.getElementById("loadingIndicator").style.display = "none";
+            };
+            
+            imgElement.onerror = () => {
+              console.error(`Failed to load image: ${page.image}`);
+              imgElement.classList.remove("loading");
+              document.getElementById("loadingIndicator").style.display = "none";
+            };
+          } else {
+            console.log(`Image already loaded: ${page.image}`);
+            // Set src for already loaded images to display them
+            // Check if the src is already set to this image to avoid duplicate requests
+            if (imgElement.src !== imagePath) {
+              imgElement.src = imagePath;
+            }
+            imgElement.classList.remove("loading");
+            document.getElementById("loadingIndicator").style.display = "none";
+          }
+        }
       }
 
       function updateNavigationButtons() {
-        // Always show navigation buttons by default, then conditionally hide them
-        prevButton.style.display = "block";
-        nextButton.style.display = "block";
-        prevButton.disabled = false;
-        nextButton.disabled = false;
-
-        // First page: hide left arrow, show right arrow (if more pages exist)
+        // First page: hide prev button, show next button
         if (currentIndex === 0) {
           prevButton.style.display = "none";
-          prevButton.disabled = true;
-          // Only hide next button if we're sure there are no more pages
-          if (pages.length <= 1) {
-            nextButton.style.display = "none";
-            nextButton.disabled = true;
-          }
+          nextButton.style.display = "block";
           homeLink.style.display = "none";
         }
-        // Second page: show both arrows, no home link
-        else if (currentIndex === 1) {
-          homeLink.style.display = "none";
-        }
-        // Third page onwards: show both arrows and home link
-        else {
+        // Last page: show prev button, hide next button
+        else if (currentIndex === pages.length - 1) {
+          prevButton.style.display = "block";
+          nextButton.style.display = "none";
           homeLink.style.display = "block";
         }
-
-        // Hide right arrow on last page
-        if (currentIndex === pages.length - 1) {
-          nextButton.style.display = "none";
-          nextButton.disabled = true;
+        // Middle pages: show both buttons
+        else {
+          prevButton.style.display = "block";
+          nextButton.style.display = "block";
+          homeLink.style.display = "block";
         }
 
         pageIndicator.textContent = `Page ${pages[currentIndex].pageNum} of ${pages.length}`;
@@ -409,37 +415,10 @@
 
         imgElement.classList.add("loading");
         loadingIndicator.style.display = "block";
-
-        const newImage = imageCache.get(pages[currentIndex].image);
         imgElement.alt = `Page ${pages[currentIndex].pageNum}`;
 
-        // Handle case where image might not be in cache yet
-        if (!newImage) {
-          console.warn(
-            `Image not found in cache: ${pages[currentIndex].image}`
-          );
-          imgElement.classList.remove("loading");
-          loadingIndicator.style.display = "none";
-          updateNavigationButtons();
-          return;
-        }
-
-        if (newImage.complete) {
-          imgElement.src = newImage.src;
-          imgElement.classList.remove("loading");
-          loadingIndicator.style.display = "none";
-        } else {
-          newImage.onload = () => {
-            imgElement.src = newImage.src;
-            imgElement.classList.remove("loading");
-            loadingIndicator.style.display = "none";
-          };
-          newImage.onerror = () => {
-            imgElement.classList.remove("loading");
-            loadingIndicator.style.display = "none";
-            console.error(`Failed to load image: ${pages[currentIndex].image}`);
-          };
-        }
+        // Load the image
+        loadImage(currentIndex);
 
         updateNavigationButtons();
 
@@ -507,11 +486,6 @@
       function initializePage() {
         const urlParams = new URLSearchParams(window.location.search);
         const pageParam = urlParams.get("page");
-
-        // Ensure images are preloaded
-        if (imageCache.size === 0) {
-          preloadImages();
-        }
 
         if (pageParam) {
           const pageIndex = pages.findIndex(
